@@ -1,0 +1,507 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+
+backend:
+  name: github
+  repo: b3rimbau/sveltia-razorbill
+
+i18n:
+  structure: multiple_root_folders
+  locales: [en, de, fr]
+  omit_default_locale_from_file_path: true
+
+media_folder: /assets
+public_folder: /src/assets
+
+collections:
+  - name: events
+    label: Events
+    label_singular: Event
+    folder: /src/events
+    media_folder: /src/assets/events
+    public_folder: /assets/events
+    create: true
+    identifier_field: name
+    slug: "{{fields._slug | localize }}"
+    i18n: true
+    fields:
+      - { label: Name, name: name, widget: string, required: true, i18n: true }
+      - { label: Summary, name: summary, widget: text, comment: "A short summary of the event, no more than 2 or 3 sentences", required: false, i18n: true }
+      - { label: Description, name: description, widget: richtext, comment: "A full description of the event", required: true, i18n: true }
+      - { label: Start date, name: start, widget: datetime, required: true, i18n: duplicate }
+      - { label: End date, name: end, widget: datetime, required: true, i18n: duplicate }
+      - { label: Logo, name: logo, widget: image, comment: "An image relevant to the event", required: false, i18n: duplicate }
+      - { label: Image, name: image, widget: image, comment: "An image relevant to the event", required: false, i18n: duplicate }
+      - { label: URL, name: url, widget: string, type: url, required: false, i18n: true }
+      - { label: Venue, name: venue, widget: string, required: false, i18n: true }
+    sortable_fields: [name, start]
+
+  - name: pages
+    label: Pages
+    files:
+      - name: homepage
+        label: Homepage
+        file: /src/index.11tydata.json
+        format: json
+        fields:
+          - { label: Title, name: title, widget: string, required: true }
+
+          - { label: Description, name: description, widget: text, required: true }
+
+          - label: Introduction
+            name: introduction
+            widget: object
+            fields:
+              - { label: Heading, name: heading, widget: string, required: true }
+              - { label: Paragraph, name: paragraph, widget: text, required: true }
+
+              - label: Panel
+                name: panel
+                widget: object
+                fields:
+                  - label: List
+                    name: list
+                    widget: list
+                    field:
+                      label: Item
+                      name: item
+                      widget: string
+
+          - label: Intro Blocks
+            name: intro_blocks
+            widget: list
+            fields:
+              - { label: Name, name: name, widget: string, required: true }
+              - { label: Link, name: link, widget: string, required: true }
+              - { label: Content, name: content, widget: markdown, required: true }
+
+          - label: Customer Banner
+            name: customer_banner
+            widget: relation
+            collection: data
+            file: customers
+            value_field: customers.*.id
+            search_fields:
+              - customers.*.name
+              - customers.*.id
+            display_fields:
+              - customers.*.name
+            multiple: true
+            required: false
+
+  - name: products
+    label: Products
+    i18n:
+      locales: [en, de, zh]
+      structure: single_file_default_root
+    files:
+      - name: overview
+        label: Overview
+        file: /src/_data/products.json
+        format: json
+        i18n: true
+        fields:
+          - name: title
+            label: Title
+            widget: string
+            required: true
+            i18n: true
+            hint: Used for the HTML page meta title
+          - name: key
+            label: Key (slug)
+            widget: string
+            required: true
+            i18n: duplicate
+            hint: Used in the URL path (links) and to relate to other entities.
+          - name: name
+            label: Name
+            widget: string
+            required: true
+            i18n: true
+          - name: description
+            label: Description
+            widget: text
+            required: true
+            i18n: true
+            hint: Used for the HTML page meta description
+          - name: introduction
+            label: Introduction
+            widget: text
+            required: true
+            i18n: true
+          - name: family
+            label: Product family
+            widget: list
+            required: false
+            i18n: true
+            fields:
+              - name: key
+                label: Key (slug)
+                widget: string
+                required: true
+                i18n: duplicate
+              - name: name
+                label: Name
+                widget: string
+                i18n: true
+              - name: logo
+                label: Logo
+                widget: image
+                required: false
+                i18n: duplicate
+              - name: strapline
+                label: Strapline
+                widget: string
+                required: true
+                i18n: true
+              - name: description
+                label: Description
+                widget: text
+                required: true
+                i18n: true
+
+  - name: data
+    label: Data
+    files:
+
+      - name: keys
+        label: Keys
+        file: /src/_data/keys.yml
+        fields:
+          - name: keys
+            label: Keys
+            widget: list
+            readonly: true
+
+      - name: customers
+        label: Customers
+        file: /src/_data/customers.json
+        media_folder: /src/assets/customers
+        public_folder: /assets/customers
+        format: json
+        fields:
+          - label: Customers
+            name: customers
+            widget: list
+            root: true
+            summary: "{{fields.name}}"
+            fields:
+              - { label: ID, name: id, widget: string, required: true }
+              - { label: Name, name: name, widget: string, required: true }
+              - label: Status
+                name: status
+                widget: select
+                required: false
+                options:
+                  - published
+                  - draft
+                  - hidden
+              - { label: Description, name: description, widget: markdown, required: false }
+              - { label: Logo, name: logo, widget: image, required: false }
+              - { label: Hero image, name: hero, widget: image, required: false }
+              - label: URLs
+                name: urls
+                widget: object
+                required: false
+                fields:
+                  - { label: Case study, name: case-study, widget: string, required: false }
+                  - { label: Press release, name: press-release, widget: string, required: false }
+                  - { label: Video, name: video, widget: string, required: false }
+
+      - name: resources
+        label: Resources
+        file: /src/_data/resources.json
+        media_folder: /src/assets
+        public_folder: /assets
+        format: json
+        fields:
+          - label: Brochures
+            name: Brochures
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - name: name
+                label: Name
+                widget: string
+                required: true
+              - label: File
+                name: href
+                widget: file
+                required: true
+                media_folder: /src/assets/documents/brochures
+                public_folder: /assets/documents/brochures
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
+
+          - label: Datasheets
+            name: Datasheets
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - label: Name
+                name: name
+                widget: string
+                required: true
+              - label: File
+                name: href
+                widget: file
+                required: true
+                media_folder: /src/assets/documents/datasheets
+                public_folder: /assets/documents/datasheets
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
+
+          - label: Articles
+            name: Articles
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - label: Name
+                name: name
+                widget: string
+                required: true
+              - label: Description
+                name: description
+                widget: text
+                required: true
+              - label: Topic
+                name: topic
+                widget: string
+              - label: Image
+                name: image
+                widget: image
+                required: true
+                media_folder: /src/assets/images/articles
+                public_folder: /assets/images/articles
+              - label: File
+                name: href
+                widget: file
+                required: true
+                media_folder: /src/assets/documents/articles
+                public_folder: /assets/documents/articles
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
+
+          - label: "White papers" # TODO This field does not match production data where name and label are the same.
+            name: "White_papers"
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - label: Name
+                name: name
+                widget: string
+                required: true
+              - label: File
+                name: href
+                widget: file
+                required: true
+                media_folder: /src/assets/documents/white-papers
+                public_folder: /assets/documents/white-papers
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
+
+          - label: "Guides"
+            name: "Guides"
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - label: Name
+                name: name
+                widget: string
+                required: true
+              - label: File
+                name: href
+                widget: file
+                required: true
+                media_folder: /src/assets/documents/guides
+                public_folder: /assets/documents/guides
+
+          - label: "Case studies"
+            name: "Case_studies" # TODO This field does not match production data where name and label are the same.
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - name: name
+                label: Name
+                widget: string
+                required: true
+              - label: File
+                name: href
+                widget: file
+                required: true
+                media_folder: /src/assets/documents/case-studies
+                public_folder: /assets/documents/case-studies
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
+
+          - label: APIs
+            name: APIs
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - name: name
+                label: Name
+                widget: string
+                required: true
+              - label: File
+                name: href
+                widget: file
+                required: true
+                media_folder: /src/assets/documents/case-studies
+                public_folder: /assets/documents/case-studies
+
+          - label: Videos
+            name: Videos
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - name: name
+                label: Name
+                widget: string
+                required: true
+              - label: Link
+                name: href
+                widget: string
+                type: url
+                required: true
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
+
+          - label: Developer
+            name: Developer
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - name: name
+                label: Name
+                widget: string
+                required: true
+              - label: Link
+                name: href
+                widget: string
+                type: url
+                required: true
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
+
+          - label: Documentation
+            name: Documentation
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - name: name
+                label: Name
+                widget: string
+                required: true
+              - label: Link
+                name: href
+                widget: string
+                type: url
+                required: true
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
+
+          - label: Tools
+            name: Tools
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - name: name
+                label: Name
+                widget: string
+                required: true
+              - label: Link
+                name: href
+                widget: string
+                type: url
+                required: true
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
+
+          - label: Partners
+            name: Partners
+            widget: list
+            summary: "{{fields.name}}"
+            collapsed: true
+            fields:
+              - name: name
+                label: Name
+                widget: string
+                required: true
+              - label: Link
+                name: href
+                widget: string
+                type: url
+                required: true
+              - name: key
+                label: Key
+                widget: relation
+                collection: data
+                file: keys
+                value_field: "keys.*"
+                multiple: true
+                required: false
