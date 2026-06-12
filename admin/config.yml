@@ -3,6 +3,9 @@
 backend:
   name: github
   repo: chrispeckham-helix/sveltia-razorbill
+  branch: main
+  base_url: https://cms.netlify.com
+
 
 i18n:
   structure: multiple_root_folders
