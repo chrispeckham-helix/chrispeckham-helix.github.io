@@ -2,7 +2,7 @@
 
 backend:
   name: github
-  repo: b3rimbau/sveltia-razorbill
+  repo: chrispeckham-helix/sveltia-razorbill
 
 i18n:
   structure: multiple_root_folders
